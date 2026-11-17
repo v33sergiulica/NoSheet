@@ -5,6 +5,7 @@ import { TableView } from './components/SimpleTable/TableView';
 import { SavedGames } from './components/SavedGames';
 import type { SimpleTableConfig } from './types';
 import { loadActiveTable, saveActiveTable, saveTableToHistory } from './utils/storage';
+import { getSoundMuted, toggleSoundMuted, playTapSound } from './utils/sound';
 
 type AppView = 'menu' | 'setup-new' | 'setup-edit' | 'saved-games' | 'table';
 
@@ -18,6 +19,17 @@ export function App() {
     if (saved) return saved === 'dark';
     return false; // start with Warm Paper or check preference
   });
+
+  // Sound effects mute state
+  const [isMuted, setIsMuted] = useState<boolean>(() => getSoundMuted());
+
+  const handleToggleSound = () => {
+    const next = toggleSoundMuted();
+    setIsMuted(next);
+    if (!next) {
+      playTapSound();
+    }
+  };
 
   useEffect(() => {
     if (isDark) {
@@ -43,14 +55,17 @@ export function App() {
 
   // Menu Actions
   const handleSelectNewTable = () => {
+    playTapSound();
     setView('setup-new');
   };
 
   const handleOpenSavedGames = () => {
+    playTapSound();
     setView('saved-games');
   };
 
   const handleResumeActiveTable = () => {
+    playTapSound();
     if (activeTable) {
       setView('table');
     }
@@ -58,6 +73,7 @@ export function App() {
 
   // Table Generation
   const handleGenerateNewTable = (newTable: SimpleTableConfig) => {
+    playTapSound();
     setActiveTable(newTable);
     saveActiveTable(newTable);
     saveTableToHistory(newTable);
@@ -71,16 +87,19 @@ export function App() {
   };
 
   const handleSelectSavedGame = (game: SimpleTableConfig) => {
+    playTapSound();
     setActiveTable(game);
     saveActiveTable(game);
     setView('table');
   };
 
   const handleBackToMenu = () => {
+    playTapSound();
     setView('menu');
   };
 
   const handleEditConfig = () => {
+    playTapSound();
     setView('setup-edit');
   };
 
@@ -94,6 +113,8 @@ export function App() {
           onResumeActiveTable={handleResumeActiveTable}
           isDark={isDark}
           onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
         />
       )}
 
@@ -105,17 +126,24 @@ export function App() {
           isEditingExisting={false}
           isDark={isDark}
           onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
         />
       )}
 
       {view === 'setup-edit' && (
         <SimpleTableSetup
-          onBack={() => setView('table')}
+          onBack={() => {
+            playTapSound();
+            setView('table');
+          }}
           onGenerate={handleGenerateNewTable}
           initialConfig={activeTable}
           isEditingExisting={true}
           isDark={isDark}
           onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
         />
       )}
 
@@ -123,8 +151,11 @@ export function App() {
         <SavedGames
           onBack={handleBackToMenu}
           onSelectGame={handleSelectSavedGame}
+          activeTableId={activeTable?.id}
           isDark={isDark}
           onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
         />
       )}
 
@@ -136,6 +167,8 @@ export function App() {
           onEditConfig={handleEditConfig}
           isDark={isDark}
           onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
         />
       )}
     </div>

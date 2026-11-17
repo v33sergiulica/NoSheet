@@ -1,7 +1,7 @@
 export interface HeaderGroup {
   id: string;
-  title: string; // e.g. "P1", "P2"
-  colSpan: number; // e.g. 2 columns for a (2 1) pair
+  title: string;
+  colSpan: number;
 }
 
 export interface ColumnConfig {
@@ -15,6 +15,7 @@ export interface TableRow {
   id: string;
   roundLabel: string;
   cells: Record<string, string>;
+  crossedCells?: Record<string, boolean>; // columnId -> true if crossed off
 }
 
 export type RowIndexingType = 'numbered' | 'circular' | 'none';
@@ -22,14 +23,15 @@ export type RowIndexingType = 'numbered' | 'circular' | 'none';
 export interface SimpleTableConfig {
   id: string;
   title: string;
-  hasRoundColumn: boolean; // true if rowIndexingType !== 'none'
-  rowIndexingType: RowIndexingType; // 'numbered' | 'circular' | 'none'
+  hasRoundColumn: boolean;
+  rowIndexingType: RowIndexingType;
   roundColumnName: string;
-  roundPrefix?: string; // for 'numbered' (e.g. "Round ", "R", "")
-  circularItems?: string[]; // for 'circular' (e.g. ["P1", "P2", "P3"])
+  roundPrefix?: string;
+  circularItems?: string[];
   headerGroups?: HeaderGroup[];
   columns: ColumnConfig[];
   rows: TableRow[];
+  drawingData?: string; // canvas drawing data URL
   createdAt: number;
   lastModified: number;
 }

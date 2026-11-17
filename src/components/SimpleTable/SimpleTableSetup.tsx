@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Check } from 'lucide-react';
 import type { SimpleTableConfig, ColumnConfig, TableRow, HeaderGroup, RowIndexingType } from '../../types';
 import { ThemeToggle } from '../ThemeToggle';
+import { SoundToggle } from '../SoundToggle';
+import { playTapSound } from '../../utils/sound';
 
 interface SimpleTableSetupProps {
   onBack: () => void;
@@ -10,6 +12,8 @@ interface SimpleTableSetupProps {
   isEditingExisting?: boolean;
   isDark: boolean;
   onToggleTheme: () => void;
+  isMuted?: boolean;
+  onToggleSound?: () => void;
 }
 
 export const SimpleTableSetup: React.FC<SimpleTableSetupProps> = ({
@@ -19,6 +23,8 @@ export const SimpleTableSetup: React.FC<SimpleTableSetupProps> = ({
   isEditingExisting = false,
   isDark,
   onToggleTheme,
+  isMuted = false,
+  onToggleSound = () => {},
 }) => {
   const [title, setTitle] = useState(
     isEditingExisting && initialConfig ? initialConfig.title : 'Score Table'
@@ -200,19 +206,20 @@ export const SimpleTableSetup: React.FC<SimpleTableSetupProps> = ({
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] px-4 py-6 sm:px-6 lg:px-8 max-w-xl mx-auto">
-      {/* Navigation & Theme Toggle */}
+      {/* Navigation & Theme / Sound Toggles */}
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={onBack}
+          onClick={() => {
+            playTapSound();
+            onBack();
+          }}
           className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-medium cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
           Back
         </button>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-serif font-bold text-[var(--text-secondary)]">
-            {isEditingExisting ? 'Edit Table Settings' : 'New Table Setup'}
-          </span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <SoundToggle isMuted={isMuted} onToggle={onToggleSound} />
           <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
         </div>
       </div>
