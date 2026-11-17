@@ -1,0 +1,22 @@
+{
+  "name": "No Sheet",
+  "short_name": "No Sheet",
+  "description": "Simple score table generator for game night",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#181512",
+  "theme_color": "#c2410c",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}

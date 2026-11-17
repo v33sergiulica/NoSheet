@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#24201c"/>
+      <stop offset="100%" stop-color="#14110f"/>
+    </linearGradient>
+    <linearGradient id="terracotta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e07259"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App Icon Squircle Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  
+  <!-- Subtle Border -->
+  <rect x="8" y="8" width="496" height="496" rx="120" fill="none" stroke="#36302a" stroke-width="8"/>
+
+  <!-- Minimalist Folded Sheet Outline -->
+  <path d="M140 100 L320 100 L400 180 L400 420 C400 435 388 448 372 448 L140 448 C124 448 112 435 112 420 L112 128 C112 112 124 100 140 100 Z" fill="#292524" stroke="#484039" stroke-width="12" stroke-linejoin="round"/>
+  
+  <!-- Sheet Corner Fold -->
+  <path d="M320 100 L320 180 L400 180 Z" fill="#36302a" stroke="#484039" stroke-width="12" stroke-linejoin="round"/>
+
+  <!-- Ledger Grid Lines in Sheet -->
+  <line x1="160" y1="230" x2="352" y2="230" stroke="#484039" stroke-width="10" stroke-linecap="round"/>
+  <line x1="160" y1="290" x2="352" y2="290" stroke="#484039" stroke-width="10" stroke-linecap="round"/>
+  <line x1="160" y1="350" x2="352" y2="350" stroke="#484039" stroke-width="10" stroke-linecap="round"/>
+  
+  <!-- Vertical Column Divider -->
+  <line x1="280" y1="200" x2="280" y2="380" stroke="#484039" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Bold Terracotta "N" Stamp -->
+  <circle cx="216" cy="290" r="38" fill="url(#terracotta)"/>
+  <text x="216" y="304" font-family="-apple-system, sans-serif" font-size="42" font-weight="900" fill="#ffffff" text-anchor="middle">N</text>
+</svg>
