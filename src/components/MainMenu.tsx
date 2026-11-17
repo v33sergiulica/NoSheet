@@ -8,6 +8,7 @@ import { playTapSound } from '../utils/sound';
 interface MainMenuProps {
   onSelectSimpleTable: () => void;
   onOpenSavedGames: () => void;
+  onOpenPresetGames: () => void;
   activeTable?: SimpleTableConfig | null;
   onResumeActiveTable?: () => void;
   isDark: boolean;
@@ -19,6 +20,7 @@ interface MainMenuProps {
 export const MainMenu: React.FC<MainMenuProps> = ({
   onSelectSimpleTable,
   onOpenSavedGames,
+  onOpenPresetGames,
   isDark,
   onToggleTheme,
   isMuted = false,
@@ -99,19 +101,27 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           </button>
 
           {/* Option 3: Preset Games */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)]/60 border border-[var(--border-paper)] flex items-center justify-between gap-4 select-none opacity-60">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] text-[var(--text-muted)] flex items-center justify-center shrink-0">
-                <Dices className="w-5 h-5" strokeWidth={1.75} />
+          <button
+            onClick={() => {
+              playTapSound();
+              onOpenPresetGames();
+            }}
+            className="w-full text-left p-4 sm:p-5 rounded-2xl bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] border border-[var(--border-paper)] hover:border-[var(--border-strong)] transition-all cursor-pointer group shadow-2xs"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-subtle-bg)] text-[var(--accent-subtle-text)] flex items-center justify-center border border-[var(--accent-subtle-border)] shrink-0">
+                  <Dices className="w-5 h-5" strokeWidth={1.75} />
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors font-serif">
+                  Preset Games
+                </h2>
               </div>
-              <h2 className="text-sm sm:text-base font-semibold text-[var(--text-secondary)] font-serif">
-                Preset Games
-              </h2>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[var(--bg-surface)] flex items-center justify-center text-[var(--text-muted)] group-hover:text-white group-hover:bg-[var(--accent)] transition-all shrink-0">
+                <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
+              </div>
             </div>
-            <span className="text-[11px] font-medium text-[var(--text-muted)] px-2 py-0.5 rounded-md bg-[var(--bg-card)] border border-[var(--border-paper)]">
-              Soon
-            </span>
-          </div>
+          </button>
         </div>
       </div>
     </div>

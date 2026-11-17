@@ -7,6 +7,7 @@ export interface HeaderGroup {
 export interface ColumnConfig {
   id: string;
   label: string;
+  subLabel?: string;
   widthRatio: number;
   groupId?: string;
 }

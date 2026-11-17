@@ -3,11 +3,13 @@ import { MainMenu } from './components/MainMenu';
 import { SimpleTableSetup } from './components/SimpleTable/SimpleTableSetup';
 import { TableView } from './components/SimpleTable/TableView';
 import { SavedGames } from './components/SavedGames';
+import { PresetGamesMenu } from './components/PresetGames/PresetGamesMenu';
+import { WhistSetup } from './components/PresetGames/WhistSetup';
 import type { SimpleTableConfig } from './types';
 import { loadActiveTable, saveActiveTable, saveTableToHistory } from './utils/storage';
 import { getSoundMuted, toggleSoundMuted, playTapSound } from './utils/sound';
 
-type AppView = 'menu' | 'setup-new' | 'setup-edit' | 'saved-games' | 'table';
+type AppView = 'menu' | 'setup-new' | 'setup-edit' | 'saved-games' | 'preset-games' | 'preset-whist' | 'table';
 
 export function App() {
   const [view, setView] = useState<AppView>('menu');
@@ -64,6 +66,16 @@ export function App() {
     setView('saved-games');
   };
 
+  const handleOpenPresetGames = () => {
+    playTapSound();
+    setView('preset-games');
+  };
+
+  const handleSelectWhist = () => {
+    playTapSound();
+    setView('preset-whist');
+  };
+
   const handleResumeActiveTable = () => {
     playTapSound();
     if (activeTable) {
@@ -109,6 +121,7 @@ export function App() {
         <MainMenu
           onSelectSimpleTable={handleSelectNewTable}
           onOpenSavedGames={handleOpenSavedGames}
+          onOpenPresetGames={handleOpenPresetGames}
           activeTable={activeTable}
           onResumeActiveTable={handleResumeActiveTable}
           isDark={isDark}
@@ -152,6 +165,31 @@ export function App() {
           onBack={handleBackToMenu}
           onSelectGame={handleSelectSavedGame}
           activeTableId={activeTable?.id}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
+        />
+      )}
+
+      {view === 'preset-games' && (
+        <PresetGamesMenu
+          onBack={handleBackToMenu}
+          onSelectWhist={handleSelectWhist}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
+        />
+      )}
+
+      {view === 'preset-whist' && (
+        <WhistSetup
+          onBack={() => {
+            playTapSound();
+            setView('preset-games');
+          }}
+          onGenerate={handleGenerateNewTable}
           isDark={isDark}
           onToggleTheme={toggleTheme}
           isMuted={isMuted}

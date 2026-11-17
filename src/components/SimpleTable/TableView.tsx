@@ -3,7 +3,6 @@ import {
   ArrowLeft, 
   Plus, 
   Trash2, 
-  RotateCcw, 
   Sliders,
   Maximize2,
   Minimize2,
@@ -295,6 +294,7 @@ export const TableView: React.FC<TableViewProps> = ({
   // Long press detection ref
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPressRef = useRef<boolean>(false);
+  const lastTouchTimeRef = useRef<number>(0);
 
   // Crash protection: ensure table is saved on unload or app backgrounding
   useEffect(() => {
@@ -320,7 +320,8 @@ export const TableView: React.FC<TableViewProps> = ({
   const columnWidths = useMemo(() => {
     return table.columns.map((col) => {
       const isNarrow = col.widthRatio === 1;
-      const labelChars = col.label ? col.label.length : 4;
+      const displayLabel = col.subLabel || col.label;
+      const labelChars = displayLabel ? displayLabel.length : 4;
       const textWidthNeeded = labelChars * 9 + 20;
 
       if (isFitContent) {
@@ -348,8 +349,57 @@ export const TableView: React.FC<TableViewProps> = ({
     }
   }, [table.hasRoundColumn, isFitContent, columnWidths, totalRatio]);
 
+  // History stack for undoing score changes, cross-offs, or row modifications
+  const [history, setHistory] = useState<TableRow[][]>([]);
+  const cellSnapshotOnFocusRef = useRef<{ rowId: string; colId: string; rows: TableRow[] } | null>(null);
+  const lastEditedCellRef = useRef<string | null>(null);
+
+  // Clear undo stack when switching to another table
+  useEffect(() => {
+    setHistory([]);
+    cellSnapshotOnFocusRef.current = null;
+    lastEditedCellRef.current = null;
+  }, [table.id]);
+
+  const pushHistory = (rowsToSave: TableRow[]) => {
+    setHistory((prev) => [...prev.slice(-30), JSON.parse(JSON.stringify(rowsToSave))]);
+  };
+
+  const handleCellFocus = (rowId: string, colId: string) => {
+    cellSnapshotOnFocusRef.current = {
+      rowId,
+      colId,
+      rows: JSON.parse(JSON.stringify(table.rows)),
+    };
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+    playTapSound();
+    lastEditedCellRef.current = null;
+    cellSnapshotOnFocusRef.current = null;
+
+    const previousRows = history[history.length - 1];
+    const nextHistory = history.slice(0, -1);
+    setHistory(nextHistory);
+
+    const updatedTable: SimpleTableConfig = {
+      ...table,
+      rows: previousRows,
+      lastModified: Date.now(),
+    };
+
+    onUpdateTable(updatedTable);
+    saveActiveTable(updatedTable);
+  };
+
   // Toggle Cross-Off State (Pen Strike)
   const toggleCrossCell = (rowId: string, colId: string) => {
+    // Record current state before cross-off
+    pushHistory(table.rows);
+    lastEditedCellRef.current = null;
+    cellSnapshotOnFocusRef.current = null;
+
     // Play authentic pen scratch audio
     playCrossSound();
 
@@ -387,11 +437,34 @@ export const TableView: React.FC<TableViewProps> = ({
   };
 
   // Long-press handlers for touch / mouse
-  const handleTouchStart = (rowId: string, colId: string) => {
+  const handleTouchStart = (rowId: string, colId: string, isTouch: boolean) => {
+    if (isTouch) {
+      lastTouchTimeRef.current = Date.now();
+    } else {
+      // If simulated mouse event within 600ms of a touch, ignore it
+      if (Date.now() - lastTouchTimeRef.current < 600) {
+        return;
+      }
+    }
+
+    if (pressTimerRef.current) {
+      clearTimeout(pressTimerRef.current);
+    }
+
     isLongPressRef.current = false;
     pressTimerRef.current = setTimeout(() => {
       isLongPressRef.current = true;
       toggleCrossCell(rowId, colId);
+
+      // Blur any active element so mobile virtual keyboard doesn't pop up
+      if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
+      // Keep isLongPressRef true for 500ms to absorb trailing contextmenu / click events
+      setTimeout(() => {
+        isLongPressRef.current = false;
+      }, 500);
     }, 420); // 420ms hold threshold
   };
 
@@ -406,6 +479,20 @@ export const TableView: React.FC<TableViewProps> = ({
   const handleCellChange = (rowId: string, colId: string, value: string) => {
     // If it was just a long press, ignore text change
     if (isLongPressRef.current) return;
+
+    const cellKey = `${rowId}_${colId}`;
+    if (
+      cellSnapshotOnFocusRef.current &&
+      cellSnapshotOnFocusRef.current.rowId === rowId &&
+      cellSnapshotOnFocusRef.current.colId === colId
+    ) {
+      pushHistory(cellSnapshotOnFocusRef.current.rows);
+      cellSnapshotOnFocusRef.current = null;
+      lastEditedCellRef.current = cellKey;
+    } else if (lastEditedCellRef.current !== cellKey) {
+      pushHistory(table.rows);
+      lastEditedCellRef.current = cellKey;
+    }
 
     const updatedRows = table.rows.map((row: TableRow) => {
       if (row.id === rowId) {
@@ -432,6 +519,10 @@ export const TableView: React.FC<TableViewProps> = ({
 
   // Add row
   const handleAddRow = () => {
+    pushHistory(table.rows);
+    lastEditedCellRef.current = null;
+    cellSnapshotOnFocusRef.current = null;
+
     playAddRowSound();
     const newIndex = table.rows.length + 1;
     let newLabel = `${newIndex}`;
@@ -467,33 +558,16 @@ export const TableView: React.FC<TableViewProps> = ({
 
   const handleDeleteRow = (rowId: string) => {
     if (table.rows.length <= 1) return;
+    pushHistory(table.rows);
+    lastEditedCellRef.current = null;
+    cellSnapshotOnFocusRef.current = null;
+
     playTapSound();
     const updatedTable: SimpleTableConfig = {
       ...table,
       rows: table.rows.filter((r: TableRow) => r.id !== rowId),
       lastModified: Date.now(),
     };
-    onUpdateTable(updatedTable);
-    saveActiveTable(updatedTable);
-  };
-
-  const handleResetScores = () => {
-    if (!window.confirm('Clear all scores? Table structure will remain.')) return;
-    playClearSound();
-    const clearedRows = table.rows.map((r: TableRow) => {
-      const cells: Record<string, string> = {};
-      table.columns.forEach((col: ColumnConfig) => {
-        cells[col.id] = '';
-      });
-      return { ...r, cells, crossedCells: {} };
-    });
-
-    const updatedTable: SimpleTableConfig = {
-      ...table,
-      rows: clearedRows,
-      lastModified: Date.now(),
-    };
-
     onUpdateTable(updatedTable);
     saveActiveTable(updatedTable);
   };
@@ -574,12 +648,14 @@ export const TableView: React.FC<TableViewProps> = ({
               )}
             </button>
 
+            {/* Undo Last Change Button */}
             <button
-              onClick={handleResetScores}
-              className="p-1.5 sm:p-2 rounded-lg text-[var(--text-muted)] hover:text-red-500 hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
-              title="Reset scores"
+              onClick={handleUndo}
+              disabled={history.length === 0}
+              className="p-1.5 sm:p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              title={history.length > 0 ? 'Undo last change' : 'Undo (no changes)'}
             >
-              <RotateCcw className="w-4 h-4" strokeWidth={1.75} />
+              <Undo2 className="w-4 h-4" strokeWidth={1.75} />
             </button>
 
             <button
@@ -718,8 +794,9 @@ export const TableView: React.FC<TableViewProps> = ({
                 <tr className="bg-[var(--bg-surface)] border-b border-[var(--border-paper)] text-xs text-[var(--text-secondary)] font-serif">
                   {table.hasRoundColumn && (
                     <th
+                      rowSpan={table.headerGroups && table.headerGroups.length > 0 ? 2 : 1}
                       style={{ width: `${roundColWidth}px` }}
-                      className="p-1 text-center font-bold text-[var(--text-muted)] border-r border-[var(--border-paper)] sticky left-0 bg-[var(--bg-surface)] z-10 text-[11px] truncate"
+                      className="p-1 text-center font-bold text-[var(--text-muted)] border-r border-[var(--border-paper)] sticky left-0 bg-[var(--bg-surface)] z-10 text-[11px] truncate align-middle"
                     >
                       {table.roundColumnName || (table.rowIndexingType === 'circular' ? 'P' : '#')}
                     </th>
@@ -752,8 +829,30 @@ export const TableView: React.FC<TableViewProps> = ({
                     })
                   )}
 
-                  <th style={{ width: `${deleteBtnWidth}px` }}></th>
+                  <th
+                    rowSpan={table.headerGroups && table.headerGroups.length > 0 ? 2 : 1}
+                    style={{ width: `${deleteBtnWidth}px` }}
+                  ></th>
                 </tr>
+
+                {/* Sub-Header Row for Grouped Games (e.g. Whist Tricks & Score) */}
+                {table.headerGroups && table.headerGroups.length > 0 && (
+                  <tr className="bg-[var(--bg-surface)]/90 border-b border-[var(--border-paper)] text-[11px]">
+                    {table.columns.map((col: ColumnConfig) => {
+                      const isNarrow = col.widthRatio === 1;
+                      return (
+                        <th
+                          key={`sub-${col.id}`}
+                          className={`p-1 text-center border-r border-[var(--border-paper)] last:border-r-0 font-mono font-bold text-[10px] truncate ${
+                            isNarrow ? 'text-[var(--accent-subtle-text)] bg-[var(--accent-subtle-bg)]/20' : 'text-[var(--text-secondary)]'
+                          }`}
+                        >
+                          {col.subLabel || col.label}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                )}
               </thead>
 
               {/* Table Data Rows */}
@@ -791,12 +890,19 @@ export const TableView: React.FC<TableViewProps> = ({
                             }`}
                             onContextMenu={(e) => {
                               e.preventDefault();
+                              if (isLongPressRef.current) {
+                                return;
+                              }
                               toggleCrossCell(row.id, col.id);
                             }}
-                            onTouchStart={() => handleTouchStart(row.id, col.id)}
+                            onTouchStart={() => handleTouchStart(row.id, col.id, true)}
                             onTouchEnd={handleTouchEnd}
-                            onTouchMove={handleTouchEnd}
-                            onMouseDown={() => handleTouchStart(row.id, col.id)}
+                            onTouchCancel={handleTouchEnd}
+                            onMouseDown={(e) => {
+                              if (e.button === 0) {
+                                handleTouchStart(row.id, col.id, false);
+                              }
+                            }}
                             onMouseUp={handleTouchEnd}
                             onMouseLeave={handleTouchEnd}
                           >
@@ -805,6 +911,8 @@ export const TableView: React.FC<TableViewProps> = ({
                                 type="text"
                                 inputMode="text"
                                 value={val}
+                                onContextMenu={(e) => e.preventDefault()}
+                                onFocus={() => handleCellFocus(row.id, col.id)}
                                 onChange={(e) => handleCellChange(row.id, col.id, e.target.value)}
                                 placeholder=""
                                 className={`w-full h-8 sm:h-9 px-1 text-center font-mono tabular-nums font-bold text-xs sm:text-sm rounded transition-all focus:outline-none focus:ring-1.5 focus:ring-[var(--accent)] border ${
