@@ -1,7 +1,7 @@
 # 🃏 No Sheet
 
 <p align="center">
-  <img src="./public/icon.png" width="160" alt="No Sheet Logo" style="border-radius: 28px;" />
+  <img src="public/logo.png" width="160" alt="No Sheet Logo" />
 </p>
 
 <p align="center">
