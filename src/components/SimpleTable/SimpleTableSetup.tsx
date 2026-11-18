@@ -69,7 +69,7 @@ export const SimpleTableSetup: React.FC<SimpleTableSetupProps> = ({
   const [isGrouped, setIsGrouped] = useState<boolean>(() => {
     return isEditingExisting && initialConfig?.headerGroups
       ? initialConfig.headerGroups.length > 0
-      : true;
+      : false;
   });
 
   const [colsPerGroup, setColsPerGroup] = useState<number>(() => {

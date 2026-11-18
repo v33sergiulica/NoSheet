@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, Dices, Sparkles, Layers } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Dices, Sparkles, Layers, Flame } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { SoundToggle } from '../SoundToggle';
 import { playTapSound } from '../../utils/sound';
@@ -7,6 +7,7 @@ import { playTapSound } from '../../utils/sound';
 interface PresetGamesMenuProps {
   onBack: () => void;
   onSelectWhist: () => void;
+  onSelectBelota: () => void;
   isDark: boolean;
   onToggleTheme: () => void;
   isMuted?: boolean;
@@ -16,6 +17,7 @@ interface PresetGamesMenuProps {
 export const PresetGamesMenu: React.FC<PresetGamesMenuProps> = ({
   onBack,
   onSelectWhist,
+  onSelectBelota,
   isDark,
   onToggleTheme,
   isMuted = false,
@@ -65,8 +67,8 @@ export const PresetGamesMenu: React.FC<PresetGamesMenuProps> = ({
             }}
             className="w-full text-left p-4 sm:p-5 rounded-2xl bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] border border-[var(--border-paper)] hover:border-[var(--accent)] transition-all cursor-pointer group shadow-2xs relative overflow-hidden"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1.5 flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <div className="space-y-1 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-md bg-[var(--accent-subtle-bg)] text-[var(--accent)] border border-[var(--accent-subtle-border)]">
                     3–6 Players
@@ -80,13 +82,40 @@ export const PresetGamesMenu: React.FC<PresetGamesMenuProps> = ({
                 <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors font-serif">
                   Romanian Whist
                 </h2>
-
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Automated card deals (1-8-1 or 8-1-8), rotating dealer markers, and 2-column player bids & scores.
-                </p>
               </div>
 
-              <div className="w-8 h-8 rounded-xl bg-[var(--bg-surface)] group-hover:bg-[var(--accent)] group-hover:text-white flex items-center justify-center text-[var(--text-muted)] transition-all shrink-0 mt-1">
+              <div className="w-8 h-8 rounded-xl bg-[var(--bg-surface)] group-hover:bg-[var(--accent)] group-hover:text-white flex items-center justify-center text-[var(--text-muted)] transition-all shrink-0">
+                <ArrowRight className="w-4 h-4" strokeWidth={2} />
+              </div>
+            </div>
+          </button>
+
+          {/* Game 2: Belota */}
+          <button
+            onClick={() => {
+              playTapSound();
+              onSelectBelota();
+            }}
+            className="w-full text-left p-4 sm:p-5 rounded-2xl bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] border border-[var(--border-paper)] hover:border-[var(--accent)] transition-all cursor-pointer group shadow-2xs relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="space-y-1 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-md bg-[var(--accent-subtle-bg)] text-[var(--accent)] border border-[var(--accent-subtle-border)]">
+                    4 Players (2 Teams)
+                  </span>
+                  <span className="text-xs font-medium text-[var(--text-muted)] flex items-center gap-1">
+                    <Flame className="w-3 h-3 text-[var(--accent)]" />
+                    Hot
+                  </span>
+                </div>
+
+                <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors font-serif">
+                  Belota
+                </h2>
+              </div>
+
+              <div className="w-8 h-8 rounded-xl bg-[var(--bg-surface)] group-hover:bg-[var(--accent)] group-hover:text-white flex items-center justify-center text-[var(--text-muted)] transition-all shrink-0">
                 <ArrowRight className="w-4 h-4" strokeWidth={2} />
               </div>
             </div>
@@ -97,7 +126,7 @@ export const PresetGamesMenu: React.FC<PresetGamesMenuProps> = ({
             <div className="w-8 h-8 rounded-xl bg-[var(--bg-card)] flex items-center justify-center shrink-0">
               <Layers className="w-4 h-4" strokeWidth={1.5} />
             </div>
-            <span>More game templates coming soon (Uno, Hearts, Oh Hell)...</span>
+            <span>More games coming soon: Rentz, Bridge, ...</span>
           </div>
         </div>
       </div>

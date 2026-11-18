@@ -1,44 +1,53 @@
 # 🃏 No Sheet
 
-> **"No Sheet"** — because every single game night, nobody has a pen, the paper is missing, and someone is writing scores on a ripped napkin with a dried-out marker. No sheet, just play.
-
 <p align="center">
-  <img src="./public/icon.png" width="160" alt="No Sheet Logo" style="border-radius: 24px;" />
+  <img src="./public/icon.png" width="160" alt="No Sheet Logo" style="border-radius: 28px;" />
 </p>
 
-A fast, no-nonsense score table generator you can pull out at game night on any phone or laptop. 
+<p align="center">
+  <strong>No Sheet. No worries.</strong><br/>
+  <em>Make custom scoresheets for any game.</em>
+</p>
+
+<p align="center">
+  <a href="https://v33sergiulica.github.io/NoSheet/">
+    <img src="https://img.shields.io/badge/PLAY%20ONLINE-NOW-c2410c?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Play No Sheet Now" />
+  </a>
+</p>
 
 ---
 
-### Why we made this
+### The Problem
 
-Most scoreboard apps either look like spreadsheets from 1998, cost \$4.99/month, or force you into rigid rules. Unity was too heavy, so we made this clean, lightweight web app instead.
+Every single game night, the exact same thing happens:
+- Nobody can find a pen.
+- The only paper is the back of an electric bill or a greasy pizza napkin.
+- Someone is using a dried-out highlighter.
+- And by round 6, nobody can read anyone's handwriting.
 
-* **Custom Column Thickness (`2 1 2 1`):** In games like Whist, Romanian Whist, or Oh Hell, you need a tiny box for a single-digit guess/bid, and a wider box for the actual score. Just type `2 1 2 1` and you're set.
-* **Merged Player Headers:** Put `P1`, `P2`, `P3` (or your friends' names) across pairs of columns without annoying clutter.
-* **Circular & Numbered Rounds:** Cycle rounds by player order (`P1 P2 P3 P4`), round numbers (`Round 1, Round 2...`), or clean raw digits.
-* **Fast Native Typing:** Tap any cell and your phone's native keyboard pops up immediately. No clunky modals.
-* **Crash-Proof:** Saves every keystroke instantly to your phone's storage. If someone accidentally closes the tab or locks their phone, your game is right where you left it.
-* **Saved Games:** Keeps a history of your past game nights so you can settle arguments about who actually won last week.
-* **Warm Paper & Warm Espresso Themes:** Switch between a warm parchment daylight mode and a cozy, late-night espresso dark mode that won't blind you across the table.
-* **Zero App Store BS:** Open the link on your phone, tap **"Add to Home Screen"**, and it installs as a full-screen app with its own icon.
+**No Sheet** fixes that. Pull it up on your phone in 2 seconds, type scores with your native keyboard, and get back to the game.
+
+👉 **[Launch No Sheet in your browser](https://v33sergiulica.github.io/NoSheet/)** *(No install, no sign-up, 100% free)*
 
 ---
 
-### Running it locally
+### What Makes It Fun & Useful
 
-If you have Node.js installed:
+* ⚡ **Tap & Play Directly**: Open the link on your phone. Tap **"Add to Home Screen"** if you want it as a fullscreen offline app with its own icon.
+* 🃏 **Presets for Game Nights**:
+  * **Romanian Whist**: Automated deals (1-8-1 & 8-1-8), round calculations, and rotating dealer markers.
+  * **Belota**: Official 7-column scorecards for 4 players in 2 teams, complete with contract, round/total points, and declarations.
+  * *More classics on the way: Rentz, Bridge, Uno, Hearts...*
+* ✏️ **Double-Tap Pen Strike**: Made a mistake or missed a bid? Double-tap or double-click any score box to strike through it with an authentic pen slash.
+* 🖍️ **Table Doodles**: Waiting for that one slow friend to take their turn? Tap the crayon tool and doodle right over the scoresheet in vintage ink colors.
+* 📐 **Custom Thickness (`2 1 2 1`)**: Type simple numbers like `2 1 2 1` to create slim columns for single-digit bids and wide columns for 3-digit scores.
+* 🔄 **Rotating Dealer Tracker**: Never argue about whose turn it is to shuffle and deal.
+* 💾 **100% Crash-Proof**: Every keystroke is saved immediately to your phone. Accidental reload? Tab closed? Phone died? Your match is right where you left it.
+* ☕ **Warm Paper & Late-Night Espresso**: Cozy vintage parchment daylight mode and an eye-friendly espresso dark mode that won't blind anyone across the table.
 
-```bash
-# Clone the repo
-git clone https://github.com/v33sergiulica/NoSheet.git
-cd NoSheet
+---
 
-# Install dependencies
-npm install
-
-# Start the game
-npm run dev
-```
-
-*(On Windows, you can also just double-click `start.bat`!)*
+<p align="center">
+  Ready for game night? Grab your phone and jump in:<br/>
+  <strong><a href="https://v33sergiulica.github.io/NoSheet/">https://v33sergiulica.github.io/NoSheet/</a></strong>
+</p>

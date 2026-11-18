@@ -32,10 +32,10 @@ export const WhistSetup: React.FC<WhistSetupProps> = ({
 
   // 2. Player Names
   const [playerNames, setPlayerNames] = useState<string[]>([
-    'Serj',
-    'Dave',
-    'Dick',
-    'Alex',
+    'Player 1',
+    'Player 2',
+    'Player 3',
+    'Player 4',
     'Player 5',
     'Player 6',
   ]);
@@ -179,6 +179,18 @@ export const WhistSetup: React.FC<WhistSetupProps> = ({
                   <input
                     type="text"
                     value={playerNames[idx] ?? ''}
+                    onFocus={(e) => {
+                      if (playerNames[idx] === `Player ${idx + 1}`) {
+                        handlePlayerNameChange(idx, '');
+                      } else {
+                        e.target.select();
+                      }
+                    }}
+                    onBlur={() => {
+                      if (!playerNames[idx] || playerNames[idx].trim() === '') {
+                        handlePlayerNameChange(idx, `Player ${idx + 1}`);
+                      }
+                    }}
                     onChange={(e) => handlePlayerNameChange(idx, e.target.value)}
                     placeholder={`Player ${idx + 1}`}
                     className="flex-1 bg-transparent text-sm font-semibold text-[var(--text-primary)] focus:outline-none"

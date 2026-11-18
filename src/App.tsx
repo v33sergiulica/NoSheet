@@ -5,15 +5,53 @@ import { TableView } from './components/SimpleTable/TableView';
 import { SavedGames } from './components/SavedGames';
 import { PresetGamesMenu } from './components/PresetGames/PresetGamesMenu';
 import { WhistSetup } from './components/PresetGames/WhistSetup';
+import { BelotaSetup } from './components/PresetGames/BelotaSetup';
+import { InstallGuideModal } from './components/InstallGuideModal';
 import type { SimpleTableConfig } from './types';
 import { loadActiveTable, saveActiveTable, saveTableToHistory } from './utils/storage';
 import { getSoundMuted, toggleSoundMuted, playTapSound } from './utils/sound';
 
-type AppView = 'menu' | 'setup-new' | 'setup-edit' | 'saved-games' | 'preset-games' | 'preset-whist' | 'table';
+type AppView = 'menu' | 'setup-new' | 'setup-edit' | 'saved-games' | 'preset-games' | 'preset-whist' | 'preset-belota' | 'table';
 
 export function App() {
   const [view, setView] = useState<AppView>('menu');
   const [activeTable, setActiveTable] = useState<SimpleTableConfig | null>(() => loadActiveTable());
+
+  // First-time visit & PWA install guide state
+  const [isInstallGuideOpen, setIsInstallGuideOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+      if (isStandalone) return false;
+      const hasSeen = localStorage.getItem('nosheet_install_guide_seen');
+      return !hasSeen;
+    }
+    return false;
+  });
+
+  // Native beforeinstallprompt support (Chrome/Android/Desktop)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
+  }, []);
+
+  const handleNativeInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      localStorage.setItem('nosheet_install_guide_seen', 'true');
+      setIsInstallGuideOpen(false);
+    }
+    setDeferredPrompt(null);
+  };
 
   // Dark mode state: default to dark (Warm Espresso) or from localStorage
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -76,6 +114,11 @@ export function App() {
     setView('preset-whist');
   };
 
+  const handleSelectBelota = () => {
+    playTapSound();
+    setView('preset-belota');
+  };
+
   const handleResumeActiveTable = () => {
     playTapSound();
     if (activeTable) {
@@ -122,6 +165,7 @@ export function App() {
           onSelectSimpleTable={handleSelectNewTable}
           onOpenSavedGames={handleOpenSavedGames}
           onOpenPresetGames={handleOpenPresetGames}
+          onOpenInstallGuide={() => setIsInstallGuideOpen(true)}
           activeTable={activeTable}
           onResumeActiveTable={handleResumeActiveTable}
           isDark={isDark}
@@ -176,6 +220,7 @@ export function App() {
         <PresetGamesMenu
           onBack={handleBackToMenu}
           onSelectWhist={handleSelectWhist}
+          onSelectBelota={handleSelectBelota}
           isDark={isDark}
           onToggleTheme={toggleTheme}
           isMuted={isMuted}
@@ -185,6 +230,20 @@ export function App() {
 
       {view === 'preset-whist' && (
         <WhistSetup
+          onBack={() => {
+            playTapSound();
+            setView('preset-games');
+          }}
+          onGenerate={handleGenerateNewTable}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          isMuted={isMuted}
+          onToggleSound={handleToggleSound}
+        />
+      )}
+
+      {view === 'preset-belota' && (
+        <BelotaSetup
           onBack={() => {
             playTapSound();
             setView('preset-games');
@@ -209,6 +268,14 @@ export function App() {
           onToggleSound={handleToggleSound}
         />
       )}
+
+      {/* First-time & on-demand Install / Add to Phone Tutorial Modal */}
+      <InstallGuideModal
+        isOpen={isInstallGuideOpen}
+        onClose={() => setIsInstallGuideOpen(false)}
+        deferredPrompt={deferredPrompt}
+        onNativeInstall={handleNativeInstall}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table2, Dices, ArrowRight, History } from 'lucide-react';
+import { Table2, Dices, ArrowRight, History, Smartphone } from 'lucide-react';
 import type { SimpleTableConfig } from '../types';
 import { ThemeToggle } from './ThemeToggle';
 import { SoundToggle } from './SoundToggle';
@@ -9,6 +9,7 @@ interface MainMenuProps {
   onSelectSimpleTable: () => void;
   onOpenSavedGames: () => void;
   onOpenPresetGames: () => void;
+  onOpenInstallGuide?: () => void;
   activeTable?: SimpleTableConfig | null;
   onResumeActiveTable?: () => void;
   isDark: boolean;
@@ -21,6 +22,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   onSelectSimpleTable,
   onOpenSavedGames,
   onOpenPresetGames,
+  onOpenInstallGuide,
   isDark,
   onToggleTheme,
   isMuted = false,
@@ -44,11 +46,14 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl shadow-md border border-[var(--border-paper)] object-cover"
             />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-1 font-serif">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] font-serif">
             No Sheet
           </h1>
+          <p className="text-sm sm:text-base font-semibold tracking-wide text-[var(--accent)] font-serif italic mt-0.5 mb-1.5">
+            No worries.
+          </p>
           <p className="text-[var(--text-secondary)] text-xs sm:text-sm max-w-xs mx-auto text-balance">
-            Ditch the scrap paper. Custom scorecards for any card game.
+            Make custom scoresheets for any game.
           </p>
         </div>
 
@@ -121,6 +126,21 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                 <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
               </div>
             </div>
+          </button>
+        </div>
+
+        {/* Footer Link: Add to Phone / Install Tutorial */}
+        <div className="mt-5 sm:mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => {
+              playTapSound();
+              onOpenInstallGuide?.();
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-subtle-bg)]/40 border border-transparent hover:border-[var(--accent-subtle-border)] transition-all cursor-pointer"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Add app to phone</span>
           </button>
         </div>
       </div>

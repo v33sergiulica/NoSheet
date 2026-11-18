@@ -291,10 +291,9 @@ export const TableView: React.FC<TableViewProps> = ({
     }
   };
 
-  // Long press detection ref
-  const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isLongPressRef = useRef<boolean>(false);
-  const lastTouchTimeRef = useRef<number>(0);
+  // Double-tap detector ref
+  const lastTapRef = useRef<{ time: number; cellKey: string } | null>(null);
+  const lastToggleTimeRef = useRef<{ time: number; cellKey: string }>({ time: 0, cellKey: '' });
 
   // Crash protection: ensure table is saved on unload or app backgrounding
   useEffect(() => {
@@ -395,6 +394,15 @@ export const TableView: React.FC<TableViewProps> = ({
 
   // Toggle Cross-Off State (Pen Strike)
   const toggleCrossCell = (rowId: string, colId: string) => {
+    const cellKey = `${rowId}_${colId}`;
+    const now = Date.now();
+
+    // Debounce to prevent rapid double-toggle when multiple events fire in burst (< 350ms)
+    if (lastToggleTimeRef.current.cellKey === cellKey && now - lastToggleTimeRef.current.time < 350) {
+      return;
+    }
+    lastToggleTimeRef.current = { time: now, cellKey };
+
     // Record current state before cross-off
     pushHistory(table.rows);
     lastEditedCellRef.current = null;
@@ -436,50 +444,28 @@ export const TableView: React.FC<TableViewProps> = ({
     saveActiveTable(updatedTable);
   };
 
-  // Long-press handlers for touch / mouse
-  const handleTouchStart = (rowId: string, colId: string, isTouch: boolean) => {
-    if (isTouch) {
-      lastTouchTimeRef.current = Date.now();
-    } else {
-      // If simulated mouse event within 600ms of a touch, ignore it
-      if (Date.now() - lastTouchTimeRef.current < 600) {
-        return;
-      }
-    }
+  // Double-tap handler for touch / click to cross off
+  const handleCellTap = (rowId: string, colId: string) => {
+    const now = Date.now();
+    const cellKey = `${rowId}_${colId}`;
+    const last = lastTapRef.current;
 
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-    }
-
-    isLongPressRef.current = false;
-    pressTimerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
+    if (last && last.cellKey === cellKey && now - last.time < 450 && now - last.time > 40) {
+      // Double tap detected!
+      lastTapRef.current = null;
       toggleCrossCell(rowId, colId);
 
-      // Blur any active element so mobile virtual keyboard doesn't pop up
+      // Blur input so keyboard immediately closes
       if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
-
-      // Keep isLongPressRef true for 500ms to absorb trailing contextmenu / click events
-      setTimeout(() => {
-        isLongPressRef.current = false;
-      }, 500);
-    }, 420); // 420ms hold threshold
-  };
-
-  const handleTouchEnd = () => {
-    if (pressTimerRef.current) {
-      clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = null;
+    } else {
+      lastTapRef.current = { time: now, cellKey };
     }
   };
 
   // Instant Crash-Proof Cell Update
   const handleCellChange = (rowId: string, colId: string, value: string) => {
-    // If it was just a long press, ignore text change
-    if (isLongPressRef.current) return;
-
     const cellKey = `${rowId}_${colId}`;
     if (
       cellSnapshotOnFocusRef.current &&
@@ -888,30 +874,35 @@ export const TableView: React.FC<TableViewProps> = ({
                             className={`p-0.5 sm:p-1 border-r border-[var(--border-paper)] last:border-r-0 relative select-none ${
                               isNarrow ? 'bg-[var(--accent-subtle-bg)]/10' : ''
                             }`}
+                            onClick={() => handleCellTap(row.id, col.id)}
                             onContextMenu={(e) => {
                               e.preventDefault();
-                              if (isLongPressRef.current) {
-                                return;
-                              }
                               toggleCrossCell(row.id, col.id);
                             }}
-                            onTouchStart={() => handleTouchStart(row.id, col.id, true)}
-                            onTouchEnd={handleTouchEnd}
-                            onTouchCancel={handleTouchEnd}
-                            onMouseDown={(e) => {
-                              if (e.button === 0) {
-                                handleTouchStart(row.id, col.id, false);
-                              }
+                            onDoubleClick={(e) => {
+                              e.preventDefault();
+                              toggleCrossCell(row.id, col.id);
                             }}
-                            onMouseUp={handleTouchEnd}
-                            onMouseLeave={handleTouchEnd}
                           >
                             <div className="relative w-full h-full flex items-center justify-center">
                               <input
                                 type="text"
                                 inputMode="text"
                                 value={val}
-                                onContextMenu={(e) => e.preventDefault()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCellTap(row.id, col.id);
+                                }}
+                                onDoubleClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  toggleCrossCell(row.id, col.id);
+                                }}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  toggleCrossCell(row.id, col.id);
+                                }}
                                 onFocus={() => handleCellFocus(row.id, col.id)}
                                 onChange={(e) => handleCellChange(row.id, col.id, e.target.value)}
                                 placeholder=""
@@ -1002,7 +993,7 @@ export const TableView: React.FC<TableViewProps> = ({
           <span className="text-[11px] text-[var(--text-muted)] font-medium">
             {isDrawingMode
               ? 'Tip: Draw freely with crayon • Tap Done when finished'
-              : 'Tip: Hold box to cross off'}
+              : 'Tip: Double-tap box to cross off'}
           </span>
         </div>
         </div>

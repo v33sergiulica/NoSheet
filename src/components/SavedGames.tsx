@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Clock, Trash2, Play, Calendar, Layers, Sparkles } from 'lucide-react';
+import { ArrowLeft, Clock, Trash2, Play, Calendar, Sparkles } from 'lucide-react';
 import type { SimpleTableConfig } from '../types';
 import { getSavedTables, deleteTableFromHistory } from '../utils/storage';
 import { ThemeToggle } from './ThemeToggle';
@@ -114,16 +114,9 @@ export const SavedGames: React.FC<SavedGamesProps> = ({
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-[var(--text-muted)] mt-1 font-mono tabular-nums">
-                      <span className="flex items-center gap-1">
-                        <Layers className="w-3.5 h-3.5" strokeWidth={1.75} />
-                        {game.rows.length} rounds • {game.columns.length} cols
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1 font-sans">
-                        <Calendar className="w-3.5 h-3.5" strokeWidth={1.75} />
-                        {formatDate(game.lastModified || game.createdAt)}
-                      </span>
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mt-1 font-sans">
+                      <Calendar className="w-3.5 h-3.5" strokeWidth={1.75} />
+                      <span>{formatDate(game.lastModified || game.createdAt)}</span>
                     </div>
                   </div>
 
