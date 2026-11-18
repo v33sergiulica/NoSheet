@@ -4,6 +4,7 @@ import type { SimpleTableConfig } from '../types';
 import { ThemeToggle } from './ThemeToggle';
 import { SoundToggle } from './SoundToggle';
 import { playTapSound } from '../utils/sound';
+import logoImg from '../assets/logo.png';
 
 interface MainMenuProps {
   onSelectSimpleTable: () => void;
@@ -41,7 +42,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         <div className="text-center mb-5 sm:mb-6">
           <div className="flex justify-center mb-2.5 sm:mb-3">
             <img
-              src="./icon.png"
+              src={logoImg}
               alt="No Sheet logo"
               className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl shadow-md border border-[var(--border-paper)] object-cover"
             />
